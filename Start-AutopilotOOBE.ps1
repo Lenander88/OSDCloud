@@ -1,4 +1,4 @@
-# start-autopilotoobe.osdcloud.ch
+# start-autopilotoobe
 $Title = "Start-AutopilotOOBE"
 $host.UI.RawUI.WindowTitle = $Title
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
