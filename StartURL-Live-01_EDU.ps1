@@ -14,7 +14,19 @@
     $setupPath = 'C:\OSDCloud\Scripts\SetupComplete'
     # Url to SetupComplete.cmd
 
-# OSDCloud Parameters
+##=======================================================================
+##   [PreOS] Update Module
+##=======================================================================
+Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor "Updating OSD PowerShell Module"
+Install-Module OSD -Force
+
+Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor "Importing OSD PowerShell Module"
+Import-Module OSD -Force   
+
+
+##=======================================================================
+##   [PreOS] Params
+##=======================================================================
 $Params = @{
     OSVersion = "Windows 11"
     OSBuild = "24H2"
@@ -24,13 +36,16 @@ $Params = @{
     ZTI = $true
     Firmware = $true
 }
-# Group all Add-Type calls together for clarity
+
+##=======================================================================
+##   [PreOS] Group all Add-Type calls together for clarity
+##=======================================================================
     Add-Type -AssemblyName System.Windows.Forms
     Add-Type -AssemblyName System.Drawing
 
-#=======================================================================
-#   [PreOS] EDU Build Selection
-#=======================================================================
+##=======================================================================
+##   [PreOS] EDU Build Selection
+##=======================================================================
 Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor $startText
 Start-Sleep -Seconds 5
 
@@ -38,7 +53,7 @@ Start-Sleep -Seconds 5
 if (!(Test-Path $csvPath) -or ((Get-Item $csvPath).LastWriteTime -lt (Get-Date).AddDays(-1))) {
     Invoke-WebRequest -Uri $csvUrl -OutFile $csvPath
 }
-
+# Import CSV
 $options = Import-CSV $csvPath
 
 # Create Form
@@ -58,6 +73,7 @@ foreach ($item in $options) {
     $comboBox.Items.Add($item.OptionName)
 }
 
+# Add ComboBox to Form
 $form.Controls.Add($comboBox)
 
 # Create OK Button
@@ -65,6 +81,7 @@ $okButton = New-Object System.Windows.Forms.Button
 $okButton.Text = "OK"
 $okButton.Location = New-Object System.Drawing.Point(100,60)
 
+# OK Button Click Event Handler
 $okButtonClickHandler = {
     $selectedOption = $comboBox.SelectedItem
     if ($selectedOption) {
@@ -75,29 +92,24 @@ $okButtonClickHandler = {
         [System.Windows.Forms.MessageBox]::Show("Please select an option.")
     }
 }
-
+ # Attach Click Event Handler
 $okButton.Add_Click($okButtonClickHandler)
 
+# Add OK Button to Form
 $form.Controls.Add($okButton)
 
 # Show Form
 $form.ShowDialog()
 
-#=======================================================================
-#   [OS] Start-OSDCloud and update OSD Module
-#=======================================================================
-Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor "Updating OSD PowerShell Module"
-Install-Module OSD -Force
-
-Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor "Importing OSD PowerShell Module"
-Import-Module OSD -Force   
-
-
+##=======================================================================
+##   [OS] Start-OSDCloud with Params
+##=======================================================================
 Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor "Start OSDCloud"
 Start-OSDCloud @Params
-#================================================
-#  [PostOS] SetupComplete CMD Command Line
-#================================================
+
+##=======================================================================
+##   [PostOS] SetupComplete CMD Command Line
+##=======================================================================
 
 Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor "Stage SetupComplete"
 
@@ -120,9 +132,9 @@ Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Lenander88/OSDCloud/de
 Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Lenander88/OSDCloud/dev/Install-LCU.ps1' `
     -OutFile "$setupPath\Install-LCU.ps1"
 
-#=======================================================================
-#   Restart-Computer
-#=======================================================================   
-    Write-Host -BackgroundColor Black -ForegroundColor Green "Restart in 20 seconds"
+##=======================================================================
+##   Restart-Computer
+##=======================================================================   
+    Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor "Restart in 20 seconds"
     Start-Sleep -Seconds 20
     wpeutil reboot
