@@ -12,7 +12,6 @@
     $selectText = "Select EDU Build"
     # SetupComplete folder path
     $setupPath = 'C:\OSDCloud\Scripts\SetupComplete'
-    # Url to SetupComplete.cmd
 
 ##=======================================================================
 ##   [PreOS] Update Module
