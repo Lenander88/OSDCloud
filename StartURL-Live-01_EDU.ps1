@@ -56,50 +56,50 @@ if (!(Test-Path $csvPath) -or ((Get-Item $csvPath).LastWriteTime -lt (Get-Date).
 # Import CSV
 $options = Import-CSV $csvPath
 
-# Create Form
-$form = New-Object System.Windows.Forms.Form
-$form.Text = $selectText
-$form.Size = New-Object System.Drawing.Size(300,150)
-$form.StartPosition = "CenterScreen"
+    # Create Form
+    $form = New-Object System.Windows.Forms.Form
+    $form.Text = $selectText
+    $form.Size = New-Object System.Drawing.Size(300,150)
+    $form.StartPosition = "CenterScreen"
 
-# Create ComboBox
-$comboBox = New-Object System.Windows.Forms.ComboBox
-$comboBox.Location = New-Object System.Drawing.Point(50,20)
-$comboBox.Size = New-Object System.Drawing.Size(200,20)
-$comboBox.DropDownStyle = 'DropDownList'  # Prevent typing, only select
+    # Create ComboBox
+    $comboBox = New-Object System.Windows.Forms.ComboBox
+    $comboBox.Location = New-Object System.Drawing.Point(50,20)
+    $comboBox.Size = New-Object System.Drawing.Size(200,20)
+    $comboBox.DropDownStyle = 'DropDownList'  # Prevent typing, only select
 
-# Populate ComboBox with OptionName from CSV
-foreach ($item in $options) {
-    $comboBox.Items.Add($item.OptionName)
-}
-
-# Add ComboBox to Form
-$form.Controls.Add($comboBox)
-
-# Create OK Button
-$okButton = New-Object System.Windows.Forms.Button
-$okButton.Text = "OK"
-$okButton.Location = New-Object System.Drawing.Point(100,60)
-
-# OK Button Click Event Handler
-$okButtonClickHandler = {
-    $selectedOption = $comboBox.SelectedItem
-    if ($selectedOption) {
-        # Assign corresponding Value to $edu (hidden from user)
-        $script:edu = ($options | Where-Object { $_.OptionName -eq $selectedOption }).Value
-        $form.Close()
-    } else {
-        [System.Windows.Forms.MessageBox]::Show("Please select an option.")
+    # Populate ComboBox with OptionName from CSV
+    foreach ($item in $options) {
+        $comboBox.Items.Add($item.OptionName)
     }
-}
- # Attach Click Event Handler
-$okButton.Add_Click($okButtonClickHandler)
 
-# Add OK Button to Form
-$form.Controls.Add($okButton)
+    # Add ComboBox to Form
+    $form.Controls.Add($comboBox)
 
-# Show Form
-$form.ShowDialog()
+    # Create OK Button
+    $okButton = New-Object System.Windows.Forms.Button
+    $okButton.Text = "OK"
+    $okButton.Location = New-Object System.Drawing.Point(100,60)
+
+    # OK Button Click Event Handler
+    $okButtonClickHandler = {
+        $selectedOption = $comboBox.SelectedItem
+        if ($selectedOption) {
+            # Assign corresponding Value to $edu (hidden from user)
+            $script:edu = ($options | Where-Object { $_.OptionName -eq $selectedOption }).Value
+            $form.Close()
+        } else {
+            [System.Windows.Forms.MessageBox]::Show("Please select an option.")
+        }
+    }
+    # Attach Click Event Handler
+    $okButton.Add_Click($okButtonClickHandler)
+
+    # Add OK Button to Form
+    $form.Controls.Add($okButton)
+
+    # Show Form
+    $form.ShowDialog()
 
 ##=======================================================================
 ##   [OS] Start-OSDCloud with Params
