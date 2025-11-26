@@ -22,7 +22,7 @@ try {
     Write-Warning "Could not load _anywhere.psm1: $($_.Exception.Message)"
 }
 Start-Sleep -Seconds 10
-Add-Type -AssemblyName PresentationFramework
+
 
 # Power plan: High performance during post-setup
 Write-Host 'Setting PowerPlan to High Performance'
@@ -43,7 +43,7 @@ Write-Output 'Running Scripts in Custom OSDCloud SetupComplete Folder'
 $SetupCompletePath = "C:\OSDCloud\Scripts\SetupComplete\SetupComplete.cmd"
 if (Test-Path $SetupCompletePath) {
     $SetupComplete = Get-ChildItem $SetupCompletePath -Filter SetupComplete.cmd
-    if ($SetupComplete) {cmd.exe /start /wait /c $SetupComplete.FullName}
+    if ($SetupComplete) {cmd.exe /c start /wait "" "$($SetupComplete.FullName)"}
 } else {
     Write-Host "No custom SetupComplete.cmd found at $SetupCompletePath"
 }
@@ -62,7 +62,7 @@ if ((Get-CimInstance Win32_BIOS).SerialNumber) {
     Write-Host $errorMessage
 }
 
-# Sets property in registry to disable Windows automatic encrytion from start during oobe phase, it does not block Intune bitlocker policy from encrypting devices post enrollment.  
+# Sets property in registry to disable Windows automatic encryption from start during oobe phase, it does not block Intune bitlocker policy from encrypting devices post enrollment.  
 # https://learn.microsoft.com/en-us/windows/security/operating-system-security/data-protection/bitlocker/
 Write-Host "Disable Windows Automatic Encryption"
 if (-not (Test-Path 'HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker')) { 
@@ -71,11 +71,11 @@ New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker' -Name 
 
 # Create local admin account
 
-#$Password = ConvertTo-SecureString "Assa#26144" -AsPlainText -Force
+$Password = ConvertTo-SecureString "Assa#26144" -AsPlainText -Force
 $local_user = @{
     Name     = 'EDU'
-#   Password = $Password
-    NoPassword = $true
+    Password = $Password
+    NoPassword = $false
     FullName = 'Education User'
     Description = 'Local administrator account for EDU purposes'
 }
@@ -95,18 +95,6 @@ if ($null -ne $user) {
     } catch {
         Write-Warning "Failed to configure local user 'EDU': $($_.Exception.Message)"
     }
-}
-
-# Apply registry settings
-foreach ($setting in $settings) {
-    $registry = [Microsoft.Win32.Registry]::LocalMachine.OpenSubKey($setting.Name, $true)
-    if ($null -eq $registry) {
-        $registry = [Microsoft.Win32.Registry]::LocalMachine.CreateSubKey($setting.Name, $true)
-    }
-    $setting.Group | ForEach-Object {
-        $registry.SetValue($_.name, $_.value)
-    }
-    $registry.Dispose()
 }
 
 # Configure power settings
