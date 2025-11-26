@@ -28,7 +28,7 @@ Import-Module OSD -Force
 ##=======================================================================
 $Params = @{
     OSVersion = "Windows 11"
-    OSBuild = "25H2"
+    OSBuild = "25H2" # "24H2" | "25H2"
     OSEdition = "Enterprise" # "Enterprise" | "Pro"
     OSLanguage = "en-us"
     OSLicense = "Retail" # "Volume" | "Retail"
