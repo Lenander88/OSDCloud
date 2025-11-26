@@ -32,6 +32,7 @@ $Params = @{
     OSEdition = "Enterprise" # "Enterprise" | "Pro"
     OSLanguage = "en-us"
     OSLicense = "Retail" # "Volume" | "Retail"
+    OSActivation = "Retail" # "Volume" | "Retail"
     ZTI = $true
     Firmware = $true
 }
