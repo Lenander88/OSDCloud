@@ -10,8 +10,6 @@
     $startText = "Starting EDU Build Selection"
     # ComboBox action text
     $selectText = "Select EDU Build"
-    # ComboBox box title
-    $boxText = "EDU Build"
     # SetupComplete folder path
     $setupPath = 'C:\OSDCloud\Scripts\SetupComplete'
     # Url to SetupComplete.cmd
@@ -48,12 +46,6 @@ $form = New-Object System.Windows.Forms.Form
 $form.Text = $selectText
 $form.Size = New-Object System.Drawing.Size(300,150)
 $form.StartPosition = "CenterScreen"
-
-$textLabel2 = New-Object "System.Windows.Forms.Label";
-$textLabel2.Left = 25;
-$textLabel2.Top = 45;
-$textLabel2.Text = $boxText;
-$form.Controls.Add($textLabel2)
 
 # Create ComboBox
 $comboBox = New-Object System.Windows.Forms.ComboBox
