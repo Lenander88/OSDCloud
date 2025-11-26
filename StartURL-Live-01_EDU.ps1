@@ -113,11 +113,11 @@ if (-not (Test-Path $setupPath)) {
 Invoke-Expression $edu
 
 # Download SetupComplete.cmd
-Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/mats-lenander_aaglobal/OSDCloud/dev/SetupComplete.cmd' `
+Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Lenander88/OSDCloud/dev/SetupComplete.cmd' `
     -OutFile "$setupPath\SetupComplete.cmd"
 
 # Download Install-LCU.ps1
-Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/mats-lenander_aaglobal/OSDCloud/dev/Install-LCU.ps1' `
+Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Lenander88/OSDCloud/dev/Install-LCU.ps1' `
     -OutFile "$setupPath\Install-LCU.ps1"
 
 #=======================================================================
