@@ -5,7 +5,7 @@
     $foregroundColor = "Green"
     # Path to CSV and URL
     $csvPath = ".\EDU.csv"
-    $csvUrl = 'https://raw.githubusercontent.com/mats-lenander_aaglobal/OSDCloud/dev/EDU.csv'
+    $csvUrl = 'https://raw.githubusercontent.com/Lenander88/OSDCloud/dev/EDU.csv'
     # Write-Host texts before ComboBox
     $startText = "Starting EDU Build Selection"
     # ComboBox action text
