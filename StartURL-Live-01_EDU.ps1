@@ -28,11 +28,10 @@ Import-Module OSD -Force
 ##=======================================================================
 $Params = @{
     OSVersion = "Windows 11"
-    OSBuild = "24H2"
+    OSBuild = "25H2"
     OSEdition = "Enterprise" # "Enterprise" | "Pro"
     OSLanguage = "en-us"
     OSLicense = "Retail" # "Volume" | "Retail"
-    OSActivation = "Retail" # "Volume" | "Retail"
     ZTI = $true
     Firmware = $true
 }
