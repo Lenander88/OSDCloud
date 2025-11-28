@@ -85,7 +85,7 @@ $options = Import-CSV $csvPath
         $selectedOption = $comboBox.SelectedItem
         if ($selectedOption) {
             # Assign corresponding Value to $edu (hidden from user)
-            $script:edu = ($options | Where-Object { $_.OptionName -eq $selectedOption }).Value
+            $global:edu = ($options | Where-Object { $_.OptionName -eq $selectedOption }).Value
             $form.Close()
         } else {
             [System.Windows.Forms.MessageBox]::Show("Please select an option.")
