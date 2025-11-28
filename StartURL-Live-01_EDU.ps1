@@ -14,16 +14,6 @@
     $setupPath = 'C:\OSDCloud\Scripts\SetupComplete'
 
 ##=======================================================================
-##   [PreOS] Update Module
-##=======================================================================
-Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor "Updating OSD PowerShell Module"
-Install-Module OSD -Force
-
-Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor "Importing OSD PowerShell Module"
-Import-Module OSD -Force   
-
-
-##=======================================================================
 ##   [PreOS] Params
 ##=======================================================================
 $Params = @{
@@ -36,6 +26,14 @@ $Params = @{
     Firmware = $true
 }
 
+##=======================================================================
+##   [PreOS] Update Module
+##=======================================================================
+Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor "Updating OSD PowerShell Module"
+Install-Module OSD -Force -SkipPublisherCheck
+
+Write-Host -BackgroundColor $backgroundColor -ForegroundColor $foregroundColor "Importing OSD PowerShell Module"
+Import-Module OSD -Force   
 ##=======================================================================
 ##   [PreOS] Group all Add-Type calls together for clarity
 ##=======================================================================
