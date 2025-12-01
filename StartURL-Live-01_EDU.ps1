@@ -23,7 +23,7 @@ $Params = @{
     OSLanguage = "en-us"
     OSLicense = "Retail" # "Volume" | "Retail"
     ZTI = $true
-    Firmware = $true
+    Firmware = $false
 }
 
 ##=======================================================================
