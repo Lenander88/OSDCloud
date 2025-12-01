@@ -75,7 +75,6 @@ $Password = ConvertTo-SecureString "Assa#26144" -AsPlainText -Force
 $local_user = @{
     Name     = 'EDU'
     Password = $Password
-    NoPassword = $false
     FullName = 'Education User'
     Description = 'Local administrator account for EDU purposes'
 }
