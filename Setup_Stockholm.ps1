@@ -1,6 +1,19 @@
 # OSDCloud SetupComplete.ps1; Location: C:\Windows\Setup\Scripts\Setup_Stockholm.ps1
 # Logs setup process, imports OSD modules, sets power plan, runs custom SetupComplete.cmd, and reboots when finished.
 
+##================================================
+## MARK: Configuration Variables
+##================================================
+$LocalUserName = 'EDU'
+$LocalUserPassword = 'Assa#26144'
+$LocalUserFullName = 'Education User'
+$LocalUserDescription = 'Local administrator account for EDU purposes'
+$ComputerNamePrefix = 'SESTV'
+$RegionalLocale = 'sv-SE'
+$RegionalCountry = 'Sweden'
+$RegionalLanguage = 'SVE'
+$TimeZoneId = 'W. Europe Standard Time'
+
 # Logging first
 $StartTime = Get-Date
 Start-Transcript -Path 'C:\OSDCloud\Logs\SetupComplete.log' -ErrorAction Ignore
@@ -54,7 +67,7 @@ if (Test-Path $SetupCompletePath) {
 if ((Get-CimInstance Win32_BIOS).SerialNumber) {
     Write-Host "Retrieving Device Serial Number"
     $serialNumber = (Get-CimInstance Win32_BIOS).SerialNumber
-    $NewComputerName = "SESTV-$serialNumber"
+    $NewComputerName = "$ComputerNamePrefix-$serialNumber"
     Write-Host "Renaming computer to $NewComputerName"
     Rename-Computer -NewName $NewComputerName -Force -Restart:$false
 } else {
@@ -69,35 +82,77 @@ if (-not (Test-Path 'HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker')) {
     New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker' -Force | Out-Null}
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker' -Name 'PreventDeviceEncryption' -Value 1 -PropertyType DWord -Force | Out-Null
 
+# Bypass OOBE and go straight to login screen
+Write-Host "Configuring system to skip OOBE"
+# Set OOBE as completed
+$OOBERegistryPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE'
+if (-not (Test-Path $OOBERegistryPath)) {
+    New-Item -Path $OOBERegistryPath -Force | Out-Null
+}
+Set-ItemProperty -Path $OOBERegistryPath -Name 'SetupDisplayedEula' -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $OOBERegistryPath -Name 'PrivacyConsentStatus' -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $OOBERegistryPath -Name 'SkipMachineOOBE' -Value 1 -Type DWord -Force
+Set-ItemProperty -Path $OOBERegistryPath -Name 'SkipUserOOBE' -Value 1 -Type DWord -Force
+
+# Disable first logon animation
+$ShellRegistryPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
+Set-ItemProperty -Path $ShellRegistryPath -Name 'EnableFirstLogonAnimation' -Value 0 -Type DWord -Force
+
+Write-Host "OOBE bypass configured."
+
 # Create local admin account
 
 $local_user = @{
-    Name        = 'EDU'
+    Name        = $LocalUserName
     NoPassword  = $true
-    FullName    = 'Education User'
-    Description = 'Local administrator account for EDU purposes'
+    FullName    = $LocalUserFullName
+    Description = $LocalUserDescription
 }
-$user = Get-LocalUser -Name 'EDU' -ErrorAction SilentlyContinue
+$user = Get-LocalUser -Name $LocalUserName -ErrorAction SilentlyContinue
 if ($null -eq $user) {
     try {
         $user = New-LocalUser @local_user -ErrorAction Stop
-        Write-Host "Created new local user 'EDU' without password."
+        Write-Host "Created new local user '$LocalUserName' without password."
     } catch {
-        Write-Warning "Failed to create local user 'EDU': $($_.Exception.Message)"
+        Write-Warning "Failed to create local user '$LocalUserName': $($_.Exception.Message)"
     }
 }
 if ($null -ne $user) {
     try {
         $user | Set-LocalUser -PasswordNeverExpires $true
         Add-LocalGroupMember -Group "Administrators" -Member $user.Name -ErrorAction Stop
-        Write-Host "Added 'EDU' to Administrators group."
+        Write-Host "Added '$LocalUserName' to Administrators group."
         
         # Set password after user creation (more reliable during OOBE)
-        $Password = ConvertTo-SecureString "Assa#26144" -AsPlainText -Force
+        $Password = ConvertTo-SecureString $LocalUserPassword -AsPlainText -Force
         $user | Set-LocalUser -Password $Password
-        Write-Host "Password set for 'EDU' account."
+        Write-Host "Password set for '$LocalUserName' account."
+        
+        # Set regional settings to Swedish for EDU user
+        Write-Host "Configuring regional settings to $RegionalLocale for $LocalUserName user"
+        $RegPath = "HKU:\$($user.SID)\Control Panel\International"
+        
+        # Load the user registry hive temporarily
+        reg load "HKU\$($user.SID)" "C:\Users\$($user.Name)\NTUSER.DAT" 2>$null
+        
+        # Set Swedish locale settings
+        Set-ItemProperty -Path $RegPath -Name "LocaleName" -Value $RegionalLocale -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $RegPath -Name "sCountry" -Value $RegionalCountry -ErrorAction SilentlyContinue
+        Set-ItemProperty -Path $RegPath -Name "sLanguage" -Value $RegionalLanguage -ErrorAction SilentlyContinue
+        
+        # Unload the registry hive
+        [gc]::Collect()
+        Start-Sleep -Seconds 1
+        reg unload "HKU\$($user.SID)" 2>$null
+        
+        Write-Host "Regional settings configured for $LocalUserName user."
+        
+        # Set timezone to W. Europe Standard Time (Stockholm/Sweden)
+        Write-Host "Setting timezone to $TimeZoneId"
+        Set-TimeZone -Id $TimeZoneId -ErrorAction SilentlyContinue
+        Write-Host "Timezone configured."
     } catch {
-        Write-Warning "Failed to configure local user 'EDU': $($_.Exception.Message)"
+        Write-Warning "Failed to configure local user '$LocalUserName': $($_.Exception.Message)"
     }
 }
 
@@ -106,17 +161,12 @@ Write-Host 'Setting PowerPlan to Balanced'
 
 # Disable sleep, hibernate and monitor standby on AC and DC power
 powercfg /setactive 381B4222-F694-41F0-9685-FF5BB260DF2E | Out-Null
-$powercfgCommands = @(
-    "-x -monitor-timeout-ac 0",
-    "-x -standby-timeout-ac 0",
-    "-x -standby-timeout-dc 0",
-    "-x -hibernate-timeout-ac 0",
-    "-x -hibernate-timeout-dc 0"
-)
-
-foreach ($cmd in $powercfgCommands) {
-    powercfg $cmd
-}
+powercfg -x -monitor-timeout-ac 0
+powercfg -x -monitor-timeout-dc 0
+powercfg -x -standby-timeout-ac 0
+powercfg -x -standby-timeout-dc 0
+powercfg -x -hibernate-timeout-ac 0
+powercfg -x -hibernate-timeout-dc 0
 
 
 # Timing & wrap-up
