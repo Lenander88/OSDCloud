@@ -8,7 +8,7 @@ $LocalUserName = 'EDU'
 $LocalUserPassword = 'Assa#26144'
 $LocalUserFullName = 'Education User'
 $LocalUserDescription = 'Local administrator account for EDU purposes'
-$ComputerNamePrefix = 'SESTV'
+$ComputerNamePrefix = 'SESTVL'
 $RegionalLocale = 'sv-SE'
 $RegionalCountry = 'Sweden'
 $RegionalLanguage = 'SVE'
@@ -61,7 +61,7 @@ if (Test-Path $SetupCompletePath) {
     Write-Host "No custom SetupComplete.cmd found at $SetupCompletePath"
 }
 
-# Renaming to SESTV-[serialnumber]
+# Renaming to [ComputerNamePrefix]-[serialnumber]
 # Test if serial number can be retrieved rename computer accordingly otherwise log error message.
 
 if ((Get-CimInstance Win32_BIOS).SerialNumber) {
@@ -128,14 +128,14 @@ if ($null -ne $user) {
         $user | Set-LocalUser -Password $Password
         Write-Host "Password set for '$LocalUserName' account."
         
-        # Set regional settings to Swedish for EDU user
+        # Set regional settings to according to $RegionalLocale for $LocalUserName user
         Write-Host "Configuring regional settings to $RegionalLocale for $LocalUserName user"
         $RegPath = "HKU:\$($user.SID)\Control Panel\International"
         
         # Load the user registry hive temporarily
         reg load "HKU\$($user.SID)" "C:\Users\$($user.Name)\NTUSER.DAT" 2>$null
         
-        # Set Swedish locale settings
+        # Set regional locale settings
         Set-ItemProperty -Path $RegPath -Name "LocaleName" -Value $RegionalLocale -ErrorAction SilentlyContinue
         Set-ItemProperty -Path $RegPath -Name "sCountry" -Value $RegionalCountry -ErrorAction SilentlyContinue
         Set-ItemProperty -Path $RegPath -Name "sLanguage" -Value $RegionalLanguage -ErrorAction SilentlyContinue
@@ -147,7 +147,7 @@ if ($null -ne $user) {
         
         Write-Host "Regional settings configured for $LocalUserName user."
         
-        # Set timezone to W. Europe Standard Time (Stockholm/Sweden)
+        # Set timezone to according to $TimeZoneId
         Write-Host "Setting timezone to $TimeZoneId"
         Set-TimeZone -Id $TimeZoneId -ErrorAction SilentlyContinue
         Write-Host "Timezone configured."
