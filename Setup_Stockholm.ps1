@@ -71,18 +71,17 @@ New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker' -Name 
 
 # Create local admin account
 
-$Password = ConvertTo-SecureString "Assa#26144" -AsPlainText -Force
 $local_user = @{
-    Name     = 'EDU'
-    Password = $Password
-    FullName = 'Education User'
+    Name        = 'EDU'
+    NoPassword  = $true
+    FullName    = 'Education User'
     Description = 'Local administrator account for EDU purposes'
 }
 $user = Get-LocalUser -Name 'EDU' -ErrorAction SilentlyContinue
 if ($null -eq $user) {
     try {
         $user = New-LocalUser @local_user -ErrorAction Stop
-        Write-Host "Created new local user 'EDU'."
+        Write-Host "Created new local user 'EDU' without password."
     } catch {
         Write-Warning "Failed to create local user 'EDU': $($_.Exception.Message)"
     }
@@ -91,6 +90,12 @@ if ($null -ne $user) {
     try {
         $user | Set-LocalUser -PasswordNeverExpires $true
         Add-LocalGroupMember -Group "Administrators" -Member $user.Name -ErrorAction Stop
+        Write-Host "Added 'EDU' to Administrators group."
+        
+        # Set password after user creation (more reliable during OOBE)
+        $Password = ConvertTo-SecureString "Assa#26144" -AsPlainText -Force
+        $user | Set-LocalUser -Password $Password
+        Write-Host "Password set for 'EDU' account."
     } catch {
         Write-Warning "Failed to configure local user 'EDU': $($_.Exception.Message)"
     }
