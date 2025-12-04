@@ -156,6 +156,32 @@ if ($null -ne $user) {
     }
 }
 
+# Enable and update Windows Defender
+Write-Host "Enabling Windows Defender and updating definitions"
+try {
+    # Ensure Windows Defender service is running
+    $DefenderService = Get-Service -Name WinDefend -ErrorAction SilentlyContinue
+    if ($DefenderService.Status -ne 'Running') {
+        Write-Host "Starting Windows Defender service"
+        Start-Service -Name WinDefend -ErrorAction Stop
+    }
+    
+    # Enable real-time protection
+    Set-MpPreference -DisableRealtimeMonitoring $false -ErrorAction SilentlyContinue
+    
+    # Update Windows Defender definitions
+    Write-Host "Updating Windows Defender definitions (this may take a moment)"
+    Update-MpSignature -ErrorAction Stop
+    Write-Host "Windows Defender definitions updated successfully"
+    
+    # Get current signature version
+    $DefenderStatus = Get-MpComputerStatus
+    Write-Host "Antivirus signature version: $($DefenderStatus.AntivirusSignatureVersion)"
+    Write-Host "Signature last updated: $($DefenderStatus.AntivirusSignatureLastUpdated)"
+} catch {
+    Write-Warning "Failed to configure Windows Defender: $($_.Exception.Message)"
+}
+
 # Configure power settings
 Write-Host 'Setting PowerPlan to Balanced'
 
