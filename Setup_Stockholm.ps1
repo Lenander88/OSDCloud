@@ -20,6 +20,7 @@ $RegionalLanguage = 'SVE' # Swedish = 'SVE' # Danish = 'DAN' # Finnish = 'FIN' #
 $TimeZoneId = 'W. Europe Standard Time' # Stockholm = 'W. Europe Standard Time' # Copenhagen = 'Romance Standard Time' # Helsinki = 'FLE Standard Time' # Oslo = 'W. Europe Standard Time'
 $KeyboardLayoutId = '0000041d'  # Swedish = '0000041d' # Danish = '00000406' # Finnish = '0000040b' # Norwegian = '00000414'
 $InstallLanguageId = '041d'     # Swedish = '041d' # Danish = '0406' # Finnish = '040b' # Norwegian = '0414'
+$KeyboardDriver = 'kbd101a.dll' # Swedish = 'kbd101a.dll' # Danish = 'kbdda.dll' # Finnish = 'kbdfi.dll' # Norwegian = 'kbdno.dll'
 
 # Logging first
 $StartTime = Get-Date
@@ -95,7 +96,7 @@ $RegPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters'
 if (-not (Test-Path $RegPath)) {
     New-Item -Path $RegPath -Force | Out-Null
 }
-Set-ItemProperty -Path $RegPath -Name "LayerDriver Swedish" -Value "kbd101a.dll" -Type String -Force -ErrorAction SilentlyContinue
+Set-ItemProperty -Path $RegPath -Name "LayerDriver $RegionalCountry" -Value $KeyboardDriver -Type String -Force -ErrorAction SilentlyContinue
 
 # Set keyboard layout via registry
 $KbdRegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layouts\$KeyboardLayoutId"
