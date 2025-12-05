@@ -4,15 +4,22 @@
 ##================================================
 ## MARK: Configuration Variables
 ##================================================
+# Local User Configuration
 $LocalUserName = 'EDU'
 $LocalUserPassword = 'Assa#26144'
 $LocalUserFullName = 'Education User'
 $LocalUserDescription = 'Local administrator account for EDU purposes'
+
+# Computer Configuration
 $ComputerNamePrefix = 'SESTVL'
-$RegionalLocale = 'sv-SE'
-$RegionalCountry = 'Sweden'
-$RegionalLanguage = 'SVE'
-$TimeZoneId = 'W. Europe Standard Time'
+
+# Regional and Localization Settings
+$RegionalLocale = 'sv-SE' # Sweden = 'sv-SE' # Denmark = 'da-DK' # Finland = 'fi-FI' # Norway = 'nb-NO'
+$RegionalCountry = 'Sweden' # Sweden = 'Sweden' # Denmark = 'Denmark' # Finland = 'Finland' # Norway = 'Norway'
+$RegionalLanguage = 'SVE' # Swedish = 'SVE' # Danish = 'DAN' # Finnish = 'FIN' # Norwegian = 'NOR'
+$TimeZoneId = 'W. Europe Standard Time' # Stockholm = 'W. Europe Standard Time' # Copenhagen = 'Romance Standard Time' # Helsinki = 'FLE Standard Time' # Oslo = 'W. Europe Standard Time'
+$KeyboardLayoutId = '0000041d'  # Swedish = '0000041d' # Danish = '00000406' # Finnish = '0000040b' # Norwegian = '00000414'
+$InstallLanguageId = '041d'     # Swedish = '041d' # Danish = '0406' # Finnish = '040b' # Norwegian = '0414'
 
 # Logging first
 $StartTime = Get-Date
@@ -82,6 +89,20 @@ if (-not (Test-Path 'HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker')) {
     New-Item -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker' -Force | Out-Null}
 New-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\BitLocker' -Name 'PreventDeviceEncryption' -Value 1 -PropertyType DWord -Force | Out-Null
 
+# Configure keyboard layout
+Write-Host "Configuring keyboard layout to $RegionalLocale"
+$RegPath = 'HKLM:\SYSTEM\CurrentControlSet\Services\i8042prt\Parameters'
+if (-not (Test-Path $RegPath)) {
+    New-Item -Path $RegPath -Force | Out-Null
+}
+Set-ItemProperty -Path $RegPath -Name "LayerDriver Swedish" -Value "kbd101a.dll" -Type String -Force -ErrorAction SilentlyContinue
+
+# Set keyboard layout via registry
+$KbdRegPath = "HKLM:\SYSTEM\CurrentControlSet\Control\Keyboard Layouts\$KeyboardLayoutId"
+if (-not (Test-Path $KbdRegPath)) {
+    New-Item -Path $KbdRegPath -Force | Out-Null
+}
+
 # Bypass OOBE and go straight to login screen
 Write-Host "Configuring system to skip OOBE"
 # Set OOBE as completed
@@ -94,11 +115,41 @@ Set-ItemProperty -Path $OOBERegistryPath -Name 'PrivacyConsentStatus' -Value 1 -
 Set-ItemProperty -Path $OOBERegistryPath -Name 'SkipMachineOOBE' -Value 1 -Type DWord -Force
 Set-ItemProperty -Path $OOBERegistryPath -Name 'SkipUserOOBE' -Value 1 -Type DWord -Force
 
+# Skip network connectivity check (prevents OOBE from asking to connect to internet)
+Set-ItemProperty -Path $OOBERegistryPath -Name 'SkipNetworkWizard' -Value 1 -Type DWord -Force
+
+# Force OOBE to not show (sets the system as already configured for local account)
+Set-ItemProperty -Path $OOBERegistryPath -Name 'UnattendCreatedUser' -Value 1 -Type DWord -Force
+
+# Disable account setup page (prevents "How would you like to set up this device?" prompt)
+$CloudExperiencePath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent\Wireless'
+if (-not (Test-Path $CloudExperiencePath)) {
+    New-Item -Path $CloudExperiencePath -Force | Out-Null
+}
+Set-ItemProperty -Path $CloudExperiencePath -Name 'ScoobeOnFirstConnect' -Value 0 -Type DWord -Force
+
+# Disable network setup page
+$WirelessPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\CloudExperienceHost\Intent'
+if (-not (Test-Path $WirelessPath)) {
+    New-Item -Path $WirelessPath -Force | Out-Null
+}
+
+# Prevent showing OOBE for account setup (domain join or local account choice)
+$CloudExperienceHostPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\CloudContent'
+if (-not (Test-Path $CloudExperienceHostPath)) {
+    New-Item -Path $CloudExperienceHostPath -Force | Out-Null
+}
+Set-ItemProperty -Path $CloudExperienceHostPath -Name 'DisableWindowsConsumerFeatures' -Value 1 -Type DWord -Force
+
 # Disable first logon animation
 $ShellRegistryPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
 Set-ItemProperty -Path $ShellRegistryPath -Name 'EnableFirstLogonAnimation' -Value 0 -Type DWord -Force
 
-Write-Host "OOBE bypass configured."
+# Pre-configure locale to skip region/language selection
+$LocalePolicyPath = 'HKLM:\SYSTEM\CurrentControlSet\Control\Nls\Language'
+Set-ItemProperty -Path $LocalePolicyPath -Name 'InstallLanguage' -Value $InstallLanguageId -Type String -Force -ErrorAction SilentlyContinue
+
+Write-Host "OOBE bypass and regional settings configured."
 
 # Create local admin account
 
