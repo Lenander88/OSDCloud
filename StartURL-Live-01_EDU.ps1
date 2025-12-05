@@ -125,7 +125,7 @@ Invoke-Expression $edu
 Invoke-WebRequest -Uri 'https://github.com/lenander88/OSDCloud/raw/dev/SetupComplete.cmd' -OutFile "$setupPath\SetupComplete.cmd"
 
 # Download Install-LCU.ps1
-Invoke-WebRequest -Uri 'https://github.com/lenander88/OSDCloud/raw/dev/Install-LCU.ps1' -OutFile "$setupPath\Install-LCU.ps1"
+# Invoke-WebRequest -Uri 'https://github.com/lenander88/OSDCloud/raw/dev/Install-LCU.ps1' -OutFile "$setupPath\Install-LCU.ps1"
 
 ##=======================================================================
 ##   Restart-Computer

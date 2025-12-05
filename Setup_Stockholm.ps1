@@ -130,20 +130,20 @@ if ($null -ne $user) {
         
         # Set regional settings to according to $RegionalLocale for $LocalUserName user
         Write-Host "Configuring regional settings to $RegionalLocale for $LocalUserName user"
-        $RegPath = "HKU:\$($user.SID)\Control Panel\International"
+        $RegPath = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Profiles\$($user.SID)\Control Panel\International"
         
         # Load the user registry hive temporarily
-        reg load "HKU\$($user.SID)" "C:\Users\$($user.Name)\NTUSER.DAT" 2>$null
+        reg load "HKEY_LOCAL_MACHINE\$($user.SID)" "C:\Users\$($user.Name)\NTUSER.DAT" 2>$null
         
-        # Set regional locale settings
-        Set-ItemProperty -Path $RegPath -Name "LocaleName" -Value $RegionalLocale -ErrorAction SilentlyContinue
-        Set-ItemProperty -Path $RegPath -Name "sCountry" -Value $RegionalCountry -ErrorAction SilentlyContinue
-        Set-ItemProperty -Path $RegPath -Name "sLanguage" -Value $RegionalLanguage -ErrorAction SilentlyContinue
+        # Set regional locale settings using reg add (more reliable for loaded hives)
+        reg add "HKEY_LOCAL_MACHINE\$($user.SID)\Control Panel\International" /v "LocaleName" /d "$RegionalLocale" /f 2>$null
+        reg add "HKEY_LOCAL_MACHINE\$($user.SID)\Control Panel\International" /v "sCountry" /d "$RegionalCountry" /f 2>$null
+        reg add "HKEY_LOCAL_MACHINE\$($user.SID)\Control Panel\International" /v "sLanguage" /d "$RegionalLanguage" /f 2>$null
         
         # Unload the registry hive
         [gc]::Collect()
         Start-Sleep -Seconds 1
-        reg unload "HKU\$($user.SID)" 2>$null
+        reg unload "HKEY_LOCAL_MACHINE\$($user.SID)" 2>$null
         
         Write-Host "Regional settings configured for $LocalUserName user."
         
