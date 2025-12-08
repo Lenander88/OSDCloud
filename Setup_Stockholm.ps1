@@ -180,29 +180,14 @@ if ($null -ne $user) {
         $user | Set-LocalUser -Password $Password
         Write-Host "Password set for '$LocalUserName' account."
         
-        # Set regional settings to according to $RegionalLocale for $LocalUserName user
-        Write-Host "Configuring regional settings to $RegionalLocale for $LocalUserName user"
-        $RegPath = "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Profiles\$($user.SID)\Control Panel\International"
-        
-        # Load the user registry hive temporarily
-        reg load "HKEY_LOCAL_MACHINE\$($user.SID)" "C:\Users\$($user.Name)\NTUSER.DAT" 2>$null
-        
-        # Set regional locale settings using reg add (more reliable for loaded hives)
-        reg add "HKEY_LOCAL_MACHINE\$($user.SID)\Control Panel\International" /v "LocaleName" /d "$RegionalLocale" /f 2>$null
-        reg add "HKEY_LOCAL_MACHINE\$($user.SID)\Control Panel\International" /v "sCountry" /d "$RegionalCountry" /f 2>$null
-        reg add "HKEY_LOCAL_MACHINE\$($user.SID)\Control Panel\International" /v "sLanguage" /d "$RegionalLanguage" /f 2>$null
-        
-        # Unload the registry hive
-        [gc]::Collect()
-        Start-Sleep -Seconds 1
-        reg unload "HKEY_LOCAL_MACHINE\$($user.SID)" 2>$null
-        
-        Write-Host "Regional settings configured for $LocalUserName user."
-        
-        # Set timezone to according to $TimeZoneId
+        # Set system-wide timezone
         Write-Host "Setting timezone to $TimeZoneId"
         Set-TimeZone -Id $TimeZoneId -ErrorAction SilentlyContinue
         Write-Host "Timezone configured."
+        
+        # Note: User-specific regional settings will be configured on first logon
+        # The system-wide locale settings above will apply as defaults
+        Write-Host "System regional settings configured. User profile settings will apply on first logon."
     } catch {
         Write-Warning "Failed to configure local user '$LocalUserName': $($_.Exception.Message)"
     }
