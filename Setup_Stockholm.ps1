@@ -105,7 +105,8 @@ if (-not (Test-Path $KbdRegPath)) {
 }
 
 # Bypass OOBE and go straight to login screen
-Write-Host "Configuring system to skip OOBE"
+Write-Host "Configuring system to skip OOBE and Microsoft account signin"
+
 # Set OOBE as completed
 $OOBERegistryPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\OOBE'
 if (-not (Test-Path $OOBERegistryPath)) {
@@ -141,6 +142,20 @@ if (-not (Test-Path $CloudExperienceHostPath)) {
     New-Item -Path $CloudExperienceHostPath -Force | Out-Null
 }
 Set-ItemProperty -Path $CloudExperienceHostPath -Name 'DisableWindowsConsumerFeatures' -Value 1 -Type DWord -Force
+
+# Force local account logon only - prevent Microsoft Account signin
+$CredUIPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Authentication\CredUI'
+if (-not (Test-Path $CredUIPath)) {
+    New-Item -Path $CredUIPath -Force | Out-Null
+}
+Set-ItemProperty -Path $CredUIPath -Name 'DevicePasswordLessBuildVersion' -Value 0 -Type DWord -Force
+
+# Disable Microsoft account option at logon
+$WindowsLogonPath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\System'
+if (-not (Test-Path $WindowsLogonPath)) {
+    New-Item -Path $WindowsLogonPath -Force | Out-Null
+}
+Set-ItemProperty -Path $WindowsLogonPath -Name 'NoConnectedUser' -Value 3 -Type DWord -Force
 
 # Disable first logon animation
 $ShellRegistryPath = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System'
