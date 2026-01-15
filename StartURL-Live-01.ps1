@@ -3,10 +3,11 @@
 ##=======================================================================
 # --- External URLs ---
 $UriLogicApp = 'https://prod-145.westus.logic.azure.com:443/workflows/dadfcaca1bcc4b069c998a99e82ee728/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=n0urWoGWa2OXN-4ba0U7UwfEM8i9vwTuSHx2PrSVtvU'
-$UriPCPKsp = 'https://github.com/Lenander88/OSDCloud/dev/main/PCPKsp.dll'
-$UriOA3Config = 'https://github.com/Lenander88/OSDCloud/dev/main/OA3.cfg'
+$UriPCPKsp = 'https://github.com/Lenander88/OSDCloud/raw/dev/PCPKsp.dll'
+$UriOA3Config = 'https://github.com/Lenander88/OSDCloud/raw/dev/OA3.cfg'
 $UriOA3Tool = 'https://github.com/Lenander88/OSDCloud/raw/dev/oa3tool.exe'
 $UriGroupTags = 'https://github.com/Lenander88/OSDCloud/raw/dev/grouptags.csv'
+# --- SetupComplete Script URLs ---
 $UriSetupComplete = 'https://github.com/dwp-lab/OSDCloud/raw/main/SetupComplete.ps1'
 $UriSetupCompleteCmd = 'https://github.com/dwp-lab/OSDCloud/raw/main/SetupComplete.cmd'
 $UriInstallLCU = 'https://github.com/dwp-lab/OSDCloud/raw/main/Install-LCU.ps1'
