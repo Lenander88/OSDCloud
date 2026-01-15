@@ -86,7 +86,7 @@ if ($serialNumber) {
 } else {
 
     Write-Host -BackgroundColor $BackgroundColor -ForegroundColor Red $MsgSerialNumberNotFound
-    [System.Windows.MessageBox]::Show($MsgSerialNumberNotFound, $MsgOSDCloudTitle, $MsgOKButton, 'Error') | Out-Null
+    [System.Windows.Forms.MessageBox]::Show($MsgSerialNumberNotFound, $MsgOSDCloudTitle, $MsgOKButton, 'Error') | Out-Null
     wpeutil shutdown
 }
 
@@ -201,7 +201,7 @@ if ($result.Response -eq 0) {
     }
 
     Write-Host -BackgroundColor $BackgroundColor -ForegroundColor Yellow $MsgAutopilotNotReady
-    [System.Windows.MessageBox]::Show($MsgAutopilotNotReady, $MsgHWHashTitle, $MsgOKButton, $MsgWarning) | Out-Null
+    [System.Windows.Forms.MessageBox]::Show($MsgAutopilotNotReady, $MsgHWHashTitle, $MsgOKButton, $MsgWarning) | Out-Null
     
     ##===================================================================
     ##   [PreOS] Module Installation
