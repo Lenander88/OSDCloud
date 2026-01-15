@@ -122,53 +122,56 @@ if ($result.Response -eq 0) {
         # Import CSV
         $groupTagOptions = Import-CSV $GroupTagsCSVPath
         
-        # Create Form
-        $form = New-Object System.Windows.Forms.Form
-        $form.Text = $MsgGroupTagTitle
-        $form.Size = New-Object System.Drawing.Size(350, 150)
-        $form.StartPosition = "CenterScreen"
-        
-        # Create Label
-        $label = New-Object System.Windows.Forms.Label
-        $label.Text = $MsgGroupTagLabel
-        $label.Location = New-Object System.Drawing.Point(20, 20)
-        $label.Size = New-Object System.Drawing.Size(100, 20)
-        $form.Controls.Add($label)
-        
-        # Create ComboBox
-        $comboBox = New-Object System.Windows.Forms.ComboBox
-        $comboBox.Location = New-Object System.Drawing.Point(120, 20)
-        $comboBox.Size = New-Object System.Drawing.Size(200, 20)
-        $comboBox.DropDownStyle = 'DropDownList'  # Prevent typing, only select
-        
-        # Populate ComboBox with grouptags from CSV
-        foreach ($item in $groupTagOptions) {
-            $comboBox.Items.Add($item.grouptags) | Out-Null
-        }
-        
-        $form.Controls.Add($comboBox)
-        
-        # Create OK Button
-        $okButton = New-Object System.Windows.Forms.Button
-        $okButton.Text = $MsgOKButton
-        $okButton.Location = New-Object System.Drawing.Point(120, 60)
-        $okButton.Cursor = [System.Windows.Forms.Cursors]::Hand
-        
-        # OK Button Click Event Handler
-        $okButtonClickHandler = {
-            if ($comboBox.SelectedItem) {
-                $script:grouptag = $comboBox.SelectedItem
-                $form.Close()
-            } else {
-                [System.Windows.Forms.MessageBox]::Show($MsgSelectValidOption)
+            # Create Form
+            $form = New-Object System.Windows.Forms.Form
+            $form.Text = $MsgGroupTagTitle
+            $form.Size = New-Object System.Drawing.Size(350, 150)
+            $form.StartPosition = "CenterScreen"
+            
+            # Create Label
+            $label = New-Object System.Windows.Forms.Label
+            $label.Text = $MsgGroupTagLabel
+            $label.Location = New-Object System.Drawing.Point(20, 20)
+            $label.Size = New-Object System.Drawing.Size(100, 20)
+            $form.Controls.Add($label)
+            
+            # Create ComboBox
+            $comboBox = New-Object System.Windows.Forms.ComboBox
+            $comboBox.Location = New-Object System.Drawing.Point(120, 20)
+            $comboBox.Size = New-Object System.Drawing.Size(200, 20)
+            $comboBox.DropDownStyle = 'DropDownList'  # Prevent typing, only select
+            
+            # Populate ComboBox with grouptags from CSV
+            foreach ($item in $groupTagOptions) {
+                $comboBox.Items.Add($item.OptionName)
             }
-        }
-        $okButton.Add_Click($okButtonClickHandler)
-        
-        $form.Controls.Add($okButton)
-        
-        # Show Form
-        $form.ShowDialog()
+            
+            # Add ComboBox to Form
+            $form.Controls.Add($comboBox)
+            
+            # Create OK Button
+            $okButton = New-Object System.Windows.Forms.Button
+            $okButton.Text = $MsgOKButton
+            $okButton.Location = New-Object System.Drawing.Point(120, 60)
+            $okButton.Cursor = [System.Windows.Forms.Cursors]::Hand
+            
+            # OK Button Click Event Handler
+            $okButtonClickHandler = {
+                $selectedOption = $comboBox.SelectedItem
+                if ($selectedOption) {
+                    # Assign corresponding value to $grouptag (hidden from user)
+                    $global:grouptag = ($groupTagOptions | Where-Object { $_.OptionName -eq $selectedOption }).Value
+                    $form.Close()
+                } else {
+                    [System.Windows.Forms.MessageBox]::Show($MsgSelectValidOption)
+                }
+            }
+            $okButton.Add_Click($okButtonClickHandler)
+            
+            $form.Controls.Add($okButton)
+            
+            # Show Form
+            $form.ShowDialog()
 
         ##=================================================================
         ##   [PreOS] Hardware Hash Export
